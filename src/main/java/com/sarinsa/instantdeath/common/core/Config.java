@@ -39,7 +39,7 @@ public class Config {
                 
                 affectedEntities = SPEC.define( new PredicateStringListField( "affected_entities", "entity type ID", makeDefaultAffectedEntities(),
                         GeneralCategory::isValidId,
-                        "A list of entities that should get insta-killed by the above listed damage types.",
+                        "A list of IDs for entity types that should get insta-killed by the below listed damage types.",
                         "By default, this only includes players." ) );
                 
                 instakillDamageTypes = SPEC.define( new PredicateStringListField( "instakill_damage_types", "damage type ID", makeDefaultDamageTypes(),
