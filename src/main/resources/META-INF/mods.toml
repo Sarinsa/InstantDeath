@@ -11,10 +11,9 @@ version = "${file.jarVersion}"
 displayName = "Instant Death"
 modId = "instantdeath"
 description = '''
-Instant Death is a mod that allows you to configure damage types to instantly kill you.
-By default these damage types include drowning, starving and touching lava.
+A simple mod that allows you to configure damage types to insta-kill players or other living creatures.
 
-Download: https://www.curseforge.com/members/fathertoast/projects/
+Download: https://www.curseforge.com/members/sarinsa/projects
 
 Source: https://github.com/Sarinsa/InstantDeath
 

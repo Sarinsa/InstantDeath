@@ -29,6 +29,13 @@ public class InstantDeath {
         MinecraftForge.EVENT_BUS.addListener( this::onLivingHurt );
     }
     
+    /**
+     * Called when a living entity is set to be hurt.
+     * If the event is canceled, the entity will not be hurt.
+     * <br><br>
+     * Here we check if the entity to hurt should be insta-killed
+     * by whatever damage type is going to hurt it.
+     */
     @SubscribeEvent( priority = EventPriority.LOWEST )
     public void onLivingHurt( LivingHurtEvent event ) {
         // noinspection resource
