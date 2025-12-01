@@ -7,7 +7,6 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
@@ -26,9 +25,8 @@ public class InstantDeath {
     
     
     public InstantDeath( FMLJavaModLoadingContext context ) {
+        Config.initialize();
         MinecraftForge.EVENT_BUS.addListener( this::onLivingHurt );
-        
-        context.registerConfig( ModConfig.Type.COMMON, Config.CONFIG_SPEC );
     }
     
     @SubscribeEvent( priority = EventPriority.LOWEST )
@@ -38,12 +36,12 @@ public class InstantDeath {
                 .getKey( event.getSource().type() ) ).toString();
         
         // Check if the damage type is in the list of insta-kill damage types.
-        if( !Config.CONFIG.instaKillDamageTypes.get().contains( typeId ) ) return;
+        if( !Config.MAIN.GENERAL.instakillDamageTypes.get().contains( typeId ) ) return;
         
         final String entityTypeId = Objects.requireNonNull( ForgeRegistries.ENTITY_TYPES.getKey( event.getEntity().getType() ) ).toString();
         
         // Check if the entity type is in the list of entity types to insta-kill.
-        if( Config.CONFIG.affectedEntities.get().contains( entityTypeId ) )
+        if( Config.MAIN.GENERAL.affectedEntities.get().contains( entityTypeId ) )
             event.setAmount( Float.MAX_VALUE );
     }
 }

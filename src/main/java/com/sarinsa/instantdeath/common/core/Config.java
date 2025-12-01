@@ -1,43 +1,83 @@
 package com.sarinsa.instantdeath.common.core;
 
+import fathertoast.crust.api.config.common.AbstractConfigCategory;
+import fathertoast.crust.api.config.common.AbstractConfigFile;
+import fathertoast.crust.api.config.common.ConfigManager;
+import fathertoast.crust.api.config.common.field.PredicateStringListField;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraftforge.common.ForgeConfigSpec;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraft.world.entity.EntityType;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 
 public class Config {
     
-    public static final MainConfig CONFIG;
-    public static final ForgeConfigSpec CONFIG_SPEC;
+    private static final ConfigManager MANAGER = ConfigManager.create( "InstantDeath", InstantDeath.MODID );
     
-    static {
-        Pair<MainConfig, ForgeConfigSpec> commonPair = new ForgeConfigSpec.Builder().configure( MainConfig::new );
-        CONFIG = commonPair.getLeft();
-        CONFIG_SPEC = commonPair.getRight();
+    public static final MainConfig MAIN = new MainConfig( MANAGER, "main" );
+    
+    
+    public static class MainConfig extends AbstractConfigFile {
+        
+        public GeneralCategory GENERAL;
+        
+        public MainConfig( ConfigManager cfgManager, String cfgName ) {
+            super( cfgManager, cfgName,
+                    "The primary config for this mod." );
+            
+            GENERAL = new GeneralCategory( this );
+        }
+        
+        public static class GeneralCategory extends AbstractConfigCategory<MainConfig> {
+            
+            public final PredicateStringListField affectedEntities;
+            public final PredicateStringListField instakillDamageTypes;
+            
+            public GeneralCategory( MainConfig parent ) {
+                super( parent, "general", "General settings for Instant Death." );
+                
+                affectedEntities = SPEC.define( new PredicateStringListField( "affected_entities", "entity type ID", makeDefaultAffectedEntities(),
+                        GeneralCategory::isValidId,
+                        "A list of entities that should get insta-killed by the above listed damage types.",
+                        "By default, this only includes players." ) );
+                
+                instakillDamageTypes = SPEC.define( new PredicateStringListField( "instakill_damage_types", "damage type ID", makeDefaultDamageTypes(),
+                        GeneralCategory::isValidId,
+                        "A list of IDs for damage types that should cause instant death.",
+                        "By default, this includes drowning, starving or lava damage." ) );
+            }
+            
+            private List<String> makeDefaultAffectedEntities() {
+                // noinspection ConstantConditions
+                return List.of(
+                        ForgeRegistries.ENTITY_TYPES.getKey( EntityType.PLAYER ).toString()
+                );
+            }
+            
+            private List<String> makeDefaultDamageTypes() {
+                return List.of(
+                        DamageTypes.DROWN.location().toString(),
+                        DamageTypes.STARVE.location().toString(),
+                        DamageTypes.LAVA.location().toString()
+                );
+            }
+            
+            /**
+             * @return True if the given string contains a namespace and path separated by ':',
+             * and passes the {@link ResourceLocation#isValidResourceLocation(String)} check.
+             */
+            private static boolean isValidId( String value ) {
+                String[] parts = value.split( ":" );
+                if( parts.length != 2 ) return false;
+                
+                return ResourceLocation.isValidResourceLocation( value );
+            }
+        }
     }
     
-    public static final class MainConfig {
-        
-        public final ForgeConfigSpec.ConfigValue<List<? extends String>> instaKillDamageTypes;
-        public final ForgeConfigSpec.ConfigValue<List<? extends String>> affectedEntities;
-        
-        private MainConfig( ForgeConfigSpec.Builder configBuilder ) {
-            configBuilder.push( "general" );
-            instaKillDamageTypes = configBuilder.comment( "A list of damage types that should instantly kill players." )
-                    .define( "insta_kill_damage_types", defaultDamageTypes() );
-            
-            affectedEntities = configBuilder.comment( "A list of entity types that should be insta-killed by the damage types in the \"insta_kill_damage_types\" list." )
-                    .define( "affected_entities", List.of( "minecraft:player" ) );
-            configBuilder.pop();
-        }
-        
-        private List<? extends String> defaultDamageTypes() {
-            return List.of(
-                    DamageTypes.DROWN.location().toString(),
-                    DamageTypes.STARVE.location().toString(),
-                    DamageTypes.LAVA.location().toString()
-            );
-        }
+    /** Performs loading of configs in this mod. Added to deferred work queue at common setup. */
+    public static void initialize() {
+        MAIN.SPEC.initialize();
     }
 }
